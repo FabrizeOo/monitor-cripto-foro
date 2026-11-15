@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PulseCripto — Análisis, Tendencias y Comunidad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- Cinta de cotizaciones deslizante -->
+<div class="ticker-tape" aria-label="Cotizaciones destacadas">
+    <div id="tickerTrack" class="ticker-track">
+        <span>Cargando cotizaciones del mercado...</span>
+    </div>
+</div>
+
+<header class="topbar">
+    <div class="topbar-inner">
+        <div class="brand">
+            <div class="brand-mark">₿</div>
+            <div>
+                <h1>PulseCripto</h1>
+                <p>Inteligencia de mercado, oportunidades y comunidad</p>
+            </div>
+        </div>
+
+        <div class="topbar-right">
+            <div id="marketStatus" class="status-chip">
+                <span class="status-dot"></span>
+                <span id="statusLabel">Conectando...</span>
+            </div>
+            <button id="btnActualizarPrecios" class="btn btn-cyan">
+                ↻ Actualizar precios
+            </button>
+        </div>
+    </div>
+</header>
+
+<main class="shell">
+    <!-- Panel de resumen y termómetro del mercado -->
+    <section class="overview-grid">
+        <div class="kpi-card">
+            <span class="kpi-label">Activos monitoreados</span>
+            <strong id="statMonedas" class="kpi-val">—</strong>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Variación promedio 24h</span>
+            <strong id="statPromedio" class="kpi-val">—</strong>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Opiniones de la comunidad</span>
+            <strong id="statComentarios" class="kpi-val">—</strong>
+        </div>
+        <div class="kpi-card kpi-sentiment">
+            <div class="sentiment-top">
+                <span class="kpi-label">Termómetro del mercado (24h)</span>
+                <span id="statSentimientoTexto" class="sentiment-ratio">—</span>
+            </div>
+            <div class="sentiment-bar">
+                <div id="barAlza" class="bar-up" style="width: 50%"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Recomendaciones / Cuál conviene vigilar -->
+    <section class="recommendations-section">
+        <div class="section-head">
+            <div>
+                <h2>🧭 Radar de Oportunidades</h2>
+                <p>Selección automática según tendencia, volumen y distancia al máximo histórico</p>
+            </div>
+        </div>
+        <div id="radarCards" class="radar-grid">
+            <div class="radar-card skeleton">Analizando oportunidades del mercado...</div>
+        </div>
+    </section>
+
+    <div class="main-columns">
+        <!-- Tabla principal del mercado -->
+        <section class="market-board">
+            <div class="board-controls">
+                <div class="search-box">
+                    <span>🔍</span>
+                    <input id="inputBuscar" type="search" placeholder="Buscar criptomoneda o símbolo (ej. BTC, Solana, ETH)..." autocomplete="off">
+                </div>
+                <select id="selectTendencia" aria-label="Filtrar tendencia">
+                    <option value="TODAS">Todo el mercado</option>
+                    <option value="ALZA">En tendencia alcista (24h)</option>
+                    <option value="BAJA">En corrección (24h)</option>
+                </select>
+                <select id="selectOrden" aria-label="Ordenar por">
+                    <option value="RANK">Por relevancia (Ranking)</option>
+                    <option value="GANADORAS">Mayores subidas 24h</option>
+                    <option value="PERDEDORAS">Mayores caídas 24h</option>
+                    <option value="VOLUMEN">Mayor volumen operado</option>
+                </select>
+            </div>
+
+            <div class="table-container">
+                <table class="crypto-table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Activo</th>
+                        <th>Precio</th>
+                        <th>1h</th>
+                        <th>24h</th>
+                        <th>7d</th>
+                        <th>Sugerencia</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tablaMonedas">
+                    <tr><td colspan="8" class="empty-row">Cargando cotizaciones...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <button id="btnPrev" class="btn btn-ghost">← Anterior</button>
+                <span id="paginaLabel" class="page-text">Página 1</span>
+                <button id="btnNext" class="btn btn-ghost">Siguiente →</button>
+            </div>
+        </section>
+
+        <!-- Foro de Inversores -->
+        <aside class="forum-panel">
+            <div class="forum-header">
+                <h2>💬 Pulso de Inversores</h2>
+                <p>Comparte tu visión alcista o bajista</p>
+            </div>
+
+            <form id="formComentario" class="post-composer">
+                <div class="composer-target" id="targetLabel">
+                    <span>Activo: <strong>MERCADO GENERAL</strong></span>
+                    <button type="button" id="btnLimpiarTarget" class="link-action hidden">General</button>
+                </div>
+                <input id="inputAutor" type="text" maxlength="40" placeholder="Tu usuario (ej. @SatoshiTrader)" required>
+                <textarea id="inputContenido" rows="3" maxlength="280" placeholder="¿Ves oportunidad de compra o toma de ganancias?" required></textarea>
+                <div class="composer-actions">
+                    <select id="selectPostura" aria-label="Tu postura">
+                        <option value="ALCISTA">🚀 Alcista</option>
+                        <option value="BAJISTA">📉 Bajista</option>
+                        <option value="NEUTRAL">💬 Neutral</option>
+                    </select>
+                    <button type="submit" class="btn btn-cyan">Publicar</button>
+                </div>
+            </form>
+
+            <div id="feedComentarios" class="forum-feed">
+                <div class="empty-row">Sé el primero en compartir tu análisis.</div>
+            </div>
+        </aside>
+    </div>
+</main>
+
+<!-- Modal Análisis Detallado + Gráfico de Evolución + Recomendación -->
+<div id="modalDetalle" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <button id="btnCerrarDetalle" class="modal-close" aria-label="Cerrar">✕</button>
+        <div id="detalleContenido"></div>
+    </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
