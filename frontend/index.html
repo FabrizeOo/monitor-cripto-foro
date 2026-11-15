@@ -3,13 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PulseCripto — Análisis, Tendencias y Comunidad</title>
+    <title>PulseCripto | Análisis, tendencias y comunidad</title>
+    <meta name="description" content="Monitor de criptomonedas en tiempo real con radar de oportunidades y foro de inversores.">
+    <meta name="theme-color" content="#05080f">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<!-- Sprite de iconos (trazo 2px, estilo uniforme) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></symbol>
+    <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></symbol>
+    <symbol id="i-bars" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/></symbol>
+    <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+    <symbol id="i-activity" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+</svg>
+
 <!-- Cinta de cotizaciones deslizante -->
 <div class="ticker-tape" aria-label="Cotizaciones destacadas">
     <div id="tickerTrack" class="ticker-track">
@@ -20,9 +45,9 @@
 <header class="topbar">
     <div class="topbar-inner">
         <div class="brand">
-            <div class="brand-mark">₿</div>
+            <img class="brand-mark" src="logo.svg" width="42" height="42" alt="Logo de PulseCripto">
             <div>
-                <h1>PulseCripto</h1>
+                <h1>Pulse<span>Cripto</span></h1>
                 <p>Inteligencia de mercado, oportunidades y comunidad</p>
             </div>
         </div>
@@ -33,7 +58,8 @@
                 <span id="statusLabel">Conectando...</span>
             </div>
             <button id="btnActualizarPrecios" class="btn btn-cyan">
-                ↻ Actualizar precios
+                <svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
+                <span>Actualizar precios</span>
             </button>
         </div>
     </div>
@@ -43,22 +69,22 @@
     <!-- Panel de resumen y termómetro del mercado -->
     <section class="overview-grid">
         <div class="kpi-card">
-            <span class="kpi-label">Activos monitoreados</span>
-            <strong id="statMonedas" class="kpi-val">—</strong>
+            <span class="kpi-label"><svg class="i" aria-hidden="true"><use href="#i-coins"/></svg>Activos monitoreados</span>
+            <strong id="statMonedas" class="kpi-val">...</strong>
         </div>
         <div class="kpi-card">
-            <span class="kpi-label">Variación promedio 24h</span>
-            <strong id="statPromedio" class="kpi-val">—</strong>
+            <span class="kpi-label"><svg class="i" aria-hidden="true"><use href="#i-activity"/></svg>Variación promedio 24h</span>
+            <strong id="statPromedio" class="kpi-val">...</strong>
         </div>
         <div class="kpi-card">
-            <span class="kpi-label">Opiniones de la comunidad</span>
-            <strong id="statComentarios" class="kpi-val">—</strong>
+            <span class="kpi-label"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Opiniones de la comunidad</span>
+            <strong id="statComentarios" class="kpi-val">...</strong>
         </div>
         <div class="kpi-card kpi-sentiment">
             <div class="sentiment-top">
-                <span class="kpi-label">Termómetro del mercado (24h)</span>
-                <span id="statSentimientoTexto" class="sentiment-ratio">—</span>
+                <span class="kpi-label"><svg class="i" aria-hidden="true"><use href="#i-gauge"/></svg>Termómetro del mercado (24h)</span>
             </div>
+            <strong id="statSentimientoTexto" class="sentiment-ratio">Calculando...</strong>
             <div class="sentiment-bar">
                 <div id="barAlza" class="bar-up" style="width: 50%"></div>
             </div>
@@ -68,13 +94,16 @@
     <!-- Sección de Recomendaciones / Cuál conviene vigilar -->
     <section class="recommendations-section">
         <div class="section-head">
+            <span class="section-icon"><svg class="i" aria-hidden="true"><use href="#i-compass"/></svg></span>
             <div>
-                <h2>🧭 Radar de Oportunidades</h2>
+                <h2>Radar de Oportunidades</h2>
                 <p>Selección automática según tendencia, volumen y distancia al máximo histórico</p>
             </div>
         </div>
         <div id="radarCards" class="radar-grid">
-            <div class="radar-card skeleton">Analizando oportunidades del mercado...</div>
+            <div class="radar-card skeleton"><span class="sk-line w40"></span><span class="sk-line w80"></span><span class="sk-line w60"></span></div>
+            <div class="radar-card skeleton"><span class="sk-line w40"></span><span class="sk-line w80"></span><span class="sk-line w60"></span></div>
+            <div class="radar-card skeleton"><span class="sk-line w40"></span><span class="sk-line w80"></span><span class="sk-line w60"></span></div>
         </div>
     </section>
 
@@ -82,10 +111,10 @@
         <!-- Tabla principal del mercado -->
         <section class="market-board">
             <div class="board-controls">
-                <div class="search-box">
-                    <span>🔍</span>
-                    <input id="inputBuscar" type="search" placeholder="Buscar criptomoneda o símbolo (ej. BTC, Solana, ETH)..." autocomplete="off">
-                </div>
+                <label class="search-box">
+                    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+                    <input id="inputBuscar" type="search" placeholder="Buscar criptomoneda o símbolo (ej. BTC, Solana, ETH)" autocomplete="off" aria-label="Buscar criptomoneda">
+                </label>
                 <select id="selectTendencia" aria-label="Filtrar tendencia">
                     <option value="TODAS">Todo el mercado</option>
                     <option value="ALZA">En tendencia alcista (24h)</option>
@@ -105,10 +134,10 @@
                     <tr>
                         <th>#</th>
                         <th>Activo</th>
-                        <th>Precio</th>
-                        <th>1h</th>
-                        <th>24h</th>
-                        <th>7d</th>
+                        <th class="num">Precio</th>
+                        <th class="num">1h</th>
+                        <th class="num">24h</th>
+                        <th class="num">7d</th>
                         <th>Sugerencia</th>
                         <th>Acciones</th>
                     </tr>
@@ -120,17 +149,20 @@
             </div>
 
             <div class="pagination">
-                <button id="btnPrev" class="btn btn-ghost">← Anterior</button>
+                <button id="btnPrev" class="btn btn-ghost"><svg class="i" aria-hidden="true"><use href="#i-left"/></svg>Anterior</button>
                 <span id="paginaLabel" class="page-text">Página 1</span>
-                <button id="btnNext" class="btn btn-ghost">Siguiente →</button>
+                <button id="btnNext" class="btn btn-ghost">Siguiente<svg class="i" aria-hidden="true"><use href="#i-right"/></svg></button>
             </div>
         </section>
 
         <!-- Foro de Inversores -->
         <aside class="forum-panel">
             <div class="forum-header">
-                <h2>💬 Pulso de Inversores</h2>
-                <p>Comparte tu visión alcista o bajista</p>
+                <span class="section-icon"><svg class="i" aria-hidden="true"><use href="#i-message"/></svg></span>
+                <div>
+                    <h2>Pulso de Inversores</h2>
+                    <p>Comparte tu visión alcista o bajista</p>
+                </div>
             </div>
 
             <form id="formComentario" class="post-composer">
@@ -138,15 +170,15 @@
                     <span>Activo: <strong>MERCADO GENERAL</strong></span>
                     <button type="button" id="btnLimpiarTarget" class="link-action hidden">General</button>
                 </div>
-                <input id="inputAutor" type="text" maxlength="40" placeholder="Tu usuario (ej. @SatoshiTrader)" required>
-                <textarea id="inputContenido" rows="3" maxlength="280" placeholder="¿Ves oportunidad de compra o toma de ganancias?" required></textarea>
+                <input id="inputAutor" type="text" maxlength="40" placeholder="Tu usuario (ej. @SatoshiTrader)" aria-label="Tu usuario" required>
+                <textarea id="inputContenido" rows="3" maxlength="280" placeholder="¿Ves oportunidad de compra o toma de ganancias?" aria-label="Tu análisis" required></textarea>
                 <div class="composer-actions">
                     <select id="selectPostura" aria-label="Tu postura">
-                        <option value="ALCISTA">🚀 Alcista</option>
-                        <option value="BAJISTA">📉 Bajista</option>
-                        <option value="NEUTRAL">💬 Neutral</option>
+                        <option value="ALCISTA">Alcista</option>
+                        <option value="BAJISTA">Bajista</option>
+                        <option value="NEUTRAL">Neutral</option>
                     </select>
-                    <button type="submit" class="btn btn-cyan">Publicar</button>
+                    <button type="submit" class="btn btn-cyan"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg>Publicar</button>
                 </div>
             </form>
 
@@ -157,10 +189,15 @@
     </div>
 </main>
 
+<footer class="site-footer">
+    <img src="logo.svg" width="22" height="22" alt="">
+    <span>PulseCripto · Datos de mercado vía CoinPaprika</span>
+</footer>
+
 <!-- Modal Análisis Detallado + Gráfico de Evolución + Recomendación -->
 <div id="modalDetalle" class="modal hidden" role="dialog" aria-modal="true">
     <div class="modal-card">
-        <button id="btnCerrarDetalle" class="modal-close" aria-label="Cerrar">✕</button>
+        <button id="btnCerrarDetalle" class="modal-close" aria-label="Cerrar"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
         <div id="detalleContenido"></div>
     </div>
 </div>

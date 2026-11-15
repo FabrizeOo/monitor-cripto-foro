@@ -132,19 +132,19 @@ async function cargarRadarOportunidades() {
 
         const tarjetas = [
             {
-                badge: "🚀 Mejor momentum hoy",
+                badge: `${icono("up")} Mejor momentum hoy`,
                 cls: "badge-momentum",
                 moneda: mejorMomentum,
                 razon: `Sube ${formatearPorcentaje(mejorMomentum.cambio24h)} en 24h con fuerte interés comprador.`
             },
             {
-                badge: "💎 Oportunidad vs máximo histórico",
+                badge: `${icono("gem")} Oportunidad vs máximo histórico`,
                 cls: "badge-rebote",
                 moneda: mayorDescuentoAth,
                 razon: `Cotiza un ${Math.abs(mayorDescuentoAth.porcentajeDesdeAth).toFixed(1)}% debajo de su máximo histórico.`
             },
             {
-                badge: "📊 Mayor liquidez del día",
+                badge: `${icono("bars")} Mayor liquidez del día`,
                 cls: "badge-comunidad",
                 moneda: mayorVolumen,
                 razon: `Mueve ${formatearCompacto(mayorVolumen.volumen24h)} en 24h; alta estabilidad de mercado.`
@@ -155,7 +155,10 @@ async function cargarRadarOportunidades() {
             <article class="radar-card" style="animation-delay:${idx * 80}ms" onclick="abrirAnalisis('${escaparHtml(t.moneda.id)}')">
                 <span class="radar-badge ${t.cls}">${t.badge}</span>
                 <div class="radar-title">
-                    <strong>${escaparHtml(t.moneda.nombre)} (${escaparHtml(t.moneda.simbolo)})</strong>
+                    <div class="radar-asset">
+                        ${logoMoneda(t.moneda, "md")}
+                        <strong>${escaparHtml(t.moneda.nombre)} <span class="asset-sym">${escaparHtml(t.moneda.simbolo)}</span></strong>
+                    </div>
                     <span class="mono">${formatearPrecio(t.moneda.precioUsd)}</span>
                 </div>
                 <p class="radar-reason">${t.razon}</p>
@@ -169,6 +172,7 @@ async function cargarRadarOportunidades() {
 function pintarTickerTape(lista) {
     const items = lista.map(m => `
         <span class="ticker-item" onclick="abrirAnalisis('${escaparHtml(m.id)}')">
+            <img src="${urlLogoMoneda(m.id)}" alt="" loading="lazy" onerror="this.remove()">
             <span class="ticker-sym">${escaparHtml(m.simbolo)}</span>
             <span class="mono">${formatearPrecio(m.precioUsd)}</span>
             <span class="${m.cambio24h >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio24h)}</span>
@@ -226,22 +230,23 @@ function pintarMonedas(lista) {
             <td>${m.rank}</td>
             <td>
                 <div class="asset-cell">
+                    ${logoMoneda(m)}
                     <strong>${escaparHtml(m.nombre)}</strong>
                     <span class="asset-sym">${escaparHtml(m.simbolo)}</span>
                 </div>
             </td>
-            <td><strong>${formatearPrecio(m.precioUsd)}</strong></td>
-            <td class="${m.cambio1h >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio1h)}</td>
-            <td class="${m.cambio24h >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio24h)}</td>
-            <td class="${m.cambio7d >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio7d)}</td>
+            <td class="num"><strong>${formatearPrecio(m.precioUsd)}</strong></td>
+            <td class="num ${m.cambio1h >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio1h)}</td>
+            <td class="num ${m.cambio24h >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio24h)}</td>
+            <td class="num ${m.cambio7d >= 0 ? "pos" : "neg"}">${formatearPorcentaje(m.cambio7d)}</td>
             <td><span class="advice-pill ${sug.clase}">${sug.texto}</span></td>
             <td onclick="event.stopPropagation()">
                 <div class="row-btns">
-                    <button class="btn btn-ghost" onclick="darLike('${escaparHtml(m.id)}')" title="Apoyar">
-                        🔥 <span class="like-count">${m.likes || 0}</span>
+                    <button class="btn btn-ghost" onclick="darLike('${escaparHtml(m.id)}')" title="Apoyar" aria-label="Apoyar ${escaparHtml(m.nombre)}">
+                        ${icono("flame")} <span class="like-count">${m.likes || 0}</span>
                     </button>
-                    <button class="btn btn-ghost" onclick="seleccionarObjetivo('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')" title="Opinar">
-                        💬
+                    <button class="btn btn-ghost" onclick="seleccionarObjetivo('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')" title="Opinar" aria-label="Opinar sobre ${escaparHtml(m.nombre)}">
+                        ${icono("message")}
                     </button>
                 </div>
             </td>
@@ -264,16 +269,20 @@ window.abrirAnalisis = async function (monedaId) {
 
     const sug = evaluarSugerencia(m);
     el.detalleContenido.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; padding-right:2rem;">
-            <div>
-                <h2>${escaparHtml(m.nombre)} <span class="asset-sym">${escaparHtml(m.simbolo)}</span></h2>
-                <p style="color:var(--muted); font-size:0.82rem;">Posición #${m.rank} en el mercado global</p>
+        <div class="detail-head">
+            <div class="detail-id">
+                ${logoMoneda(m, "lg")}
+                <div>
+                    <h2>${escaparHtml(m.nombre)} <span class="asset-sym">${escaparHtml(m.simbolo)}</span></h2>
+                    <p>Posición #${m.rank} en el mercado global</p>
+                </div>
             </div>
-            <strong class="mono" style="font-size:1.45rem;">${formatearPrecio(m.precioUsd)}</strong>
+            <strong class="mono detail-price">${formatearPrecio(m.precioUsd)}</strong>
         </div>
 
         <div class="advice-banner">
-            <strong>Lectura recomendada (${sug.texto}):</strong> ${sug.detalle}
+            ${icono("compass")}
+            <div><strong>Lectura recomendada (${sug.texto}):</strong> ${sug.detalle}</div>
         </div>
 
         <div class="detail-metrics">
@@ -292,13 +301,13 @@ window.abrirAnalisis = async function (monedaId) {
         </div>
 
         <div class="chart-box">
-            <div style="font-size:0.78rem; color:var(--muted); margin-bottom:0.45rem;">Evolución reciente de precio</div>
-            <div id="graficoPrecio">Cargando historial...</div>
+            <div class="chart-title">Evolución reciente de precio</div>
+            <div id="graficoPrecio" class="chart-empty">Cargando historial...</div>
         </div>
 
-        <div style="margin-top:1rem; display:flex; gap:0.6rem;">
-            <button class="btn btn-cyan" style="flex:1" onclick="opinarDesdeModal('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')">
-                💬 Opinar sobre ${escaparHtml(m.simbolo)}
+        <div class="detail-actions">
+            <button class="btn btn-cyan" onclick="opinarDesdeModal('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')">
+                ${icono("message")} Opinar sobre ${escaparHtml(m.simbolo)}
             </button>
         </div>
     `;
@@ -316,7 +325,7 @@ window.abrirAnalisis = async function (monedaId) {
 function renderizarGraficoSvg(puntos, esPositivo) {
     const cont = document.getElementById("graficoPrecio");
     if (!puntos || puntos.length < 2) {
-        cont.innerHTML = `<p style="font-size:0.8rem; color:var(--muted);">Aún acumulando puntos de precio para trazar la curva (se registran automáticamente cada minuto).</p>`;
+        cont.innerHTML = `<p class="chart-empty">Aún acumulando puntos de precio para trazar la curva (se registran automáticamente cada minuto).</p>`;
         return;
     }
 
@@ -334,11 +343,22 @@ function renderizarGraficoSvg(puntos, esPositivo) {
     }).join(" ");
 
     const color = esPositivo ? "#10b981" : "#f43f5e";
+    const gradId = `area-${Date.now()}`;
+    const guias = [0.25, 0.5, 0.75].map(f => `<line x1="0" x2="${w}" y1="${(h * f).toFixed(1)}" y2="${(h * f).toFixed(1)}" stroke="rgba(148,163,184,0.1)" stroke-width="1" vector-effect="non-scaling-stroke" />`).join("");
+    cont.className = "";
     cont.innerHTML = `
-        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-            <polyline fill="none" stroke="${color}" stroke-width="2.5" points="${coords}" />
+        <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Evolución del precio">
+            <defs>
+                <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="${color}" stop-opacity="0.28" />
+                    <stop offset="1" stop-color="${color}" stop-opacity="0" />
+                </linearGradient>
+            </defs>
+            ${guias}
+            <polygon fill="url(#${gradId})" points="0,${h} ${coords} ${w},${h}" />
+            <polyline fill="none" stroke="${color}" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke" points="${coords}" />
         </svg>
-        <div style="display:flex; justify-content:space-between; font-size:0.74rem; color:var(--muted); margin-top:0.35rem;">
+        <div class="chart-range">
             <span>Mín: ${formatearPrecio(min)}</span>
             <span>Máx: ${formatearPrecio(max)}</span>
         </div>
@@ -352,8 +372,9 @@ window.opinarDesdeModal = function (id, simbolo) {
 
 async function actualizarPrecios() {
     el.btnActualizarPrecios.disabled = true;
-    const txt = el.btnActualizarPrecios.textContent;
-    el.btnActualizarPrecios.textContent = "⏳ Actualizando...";
+    const txt = el.btnActualizarPrecios.innerHTML;
+    el.btnActualizarPrecios.classList.add("is-loading");
+    el.btnActualizarPrecios.innerHTML = `${icono("refresh")}<span>Actualizando...</span>`;
     try {
         const res = await fetch(`${API_BASE_URL}/api/criptos/sincronizar?limite=1500&snapshotsTop=150`, { method: "POST" });
         if (!res.ok) throw new Error();
@@ -362,7 +383,8 @@ async function actualizarPrecios() {
         alert("No se pudo actualizar los precios en este momento.");
     } finally {
         el.btnActualizarPrecios.disabled = false;
-        el.btnActualizarPrecios.textContent = txt;
+        el.btnActualizarPrecios.classList.remove("is-loading");
+        el.btnActualizarPrecios.innerHTML = txt;
     }
 }
 
@@ -410,11 +432,16 @@ function pintarComentarios(lista) {
 
 function renderComentarioHtml(c) {
     const fecha = c.fechaCreacion ? new Date(c.fechaCreacion).toLocaleString("es-ES") : "Recién publicado";
+    const iconoPostura = { ALCISTA: "up", BAJISTA: "down" }[c.postura] || "minus";
+    const inicial = String(c.autor || "?").replace(/^@/, "").charAt(0) || "?";
     return `
         <div class="post-card">
             <div class="post-head">
-                <span class="post-author">${escaparHtml(c.autor)}</span>
-                <span class="post-stance stance-${escaparHtml(c.postura)}">${escaparHtml(c.postura)}</span>
+                <span class="post-who">
+                    <span class="post-avatar" style="background:${colorDesdeTexto(c.autor)}">${escaparHtml(inicial)}</span>
+                    <span class="post-author">${escaparHtml(c.autor)}</span>
+                </span>
+                <span class="post-stance stance-${escaparHtml(c.postura)}">${icono(iconoPostura)}${escaparHtml(c.postura)}</span>
             </div>
             <div class="post-symbol">$${escaparHtml(c.simbolo || "MERCADO")}</div>
             <p class="post-body">${escaparHtml(c.contenido)}</p>
@@ -497,6 +524,26 @@ function formatearCompacto(n) {
     if (v >= 1e9) return `$${(v / 1e9).toFixed(2)}B`;
     if (v >= 1e6) return `$${(v / 1e6).toFixed(2)}M`;
     return `$${v.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+}
+
+function icono(nombre) {
+    return `<svg class="i" aria-hidden="true"><use href="#i-${nombre}"/></svg>`;
+}
+
+function urlLogoMoneda(id) {
+    return `https://static.coinpaprika.com/coin/${encodeURIComponent(id)}/logo.png`;
+}
+
+function logoMoneda(m, tamano = "") {
+    const inicial = escaparHtml(String(m.simbolo || "?").charAt(0));
+    return `<span class="coin-logo ${tamano}">${inicial}<img src="${urlLogoMoneda(m.id)}" alt="" loading="lazy" onerror="this.remove()"></span>`;
+}
+
+function colorDesdeTexto(texto) {
+    const paleta = ["#22d3ee", "#34d399", "#fbbf24", "#a78bfa", "#fb7185", "#60a5fa"];
+    let h = 0;
+    for (const ch of String(texto || "")) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return paleta[h % paleta.length];
 }
 
 function escaparHtml(texto) {
