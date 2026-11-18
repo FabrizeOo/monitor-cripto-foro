@@ -46,29 +46,6 @@
     </div>
 </div>
 
-<header class="topbar">
-    <div class="topbar-inner">
-        <div class="brand">
-            <img class="brand-mark" src="logo.svg" width="42" height="42" alt="Logo de PulseCripto">
-            <div>
-                <h1>Pulse<span>Cripto</span></h1>
-                <p>Inteligencia de mercado, oportunidades y comunidad</p>
-            </div>
-        </div>
-
-        <div class="topbar-right">
-            <div id="marketStatus" class="status-chip">
-                <span class="status-dot"></span>
-                <span id="statusLabel">Conectando...</span>
-            </div>
-            <button id="btnActualizarPrecios" class="btn btn-cyan">
-                <svg class="i" aria-hidden="true"><use href="#i-refresh"/></svg>
-                <span>Actualizar precios</span>
-            </button>
-        </div>
-    </div>
-</header>
-
 <main class="shell">
     <!-- Panel de resumen y termómetro del mercado -->
     <section class="overview-grid">
@@ -110,36 +87,6 @@
             <div class="radar-card skeleton"><span class="sk-line w40"></span><span class="sk-line w80"></span><span class="sk-line w60"></span></div>
         </div>
     </section>
-
-    <!-- Panel de Operaciones de Base de Datos (CRUD + Agregaciones MongoDB) -->
-    <details class="db-ops-panel">
-        <summary class="db-ops-summary">
-            <span class="db-ops-title">
-                <svg class="i" aria-hidden="true"><use href="#i-db"/></svg>
-                <strong>Operaciones MongoDB &amp; Reportes Analíticos</strong>
-                <span class="db-ops-sub">Actualización masiva (updateMany), purga de snapshots (DELETE) y agregación en colección reportes_bi</span>
-            </span>
-        </summary>
-        <div class="db-ops-body">
-            <div class="db-ops-actions">
-                <button type="button" id="btnRecalcularEtiquetas" class="btn btn-ghost">
-                    <svg class="i" aria-hidden="true"><use href="#i-activity"/></svg>
-                    <span>Clasificar riesgo en lote (updateMany)</span>
-                </button>
-                <button type="button" id="btnPurgarSnapshots" class="btn btn-ghost">
-                    <svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>
-                    <span>Purgar snapshots antiguos (conservar 1,500)</span>
-                </button>
-                <button type="button" id="btnGenerarReporteBi" class="btn btn-cyan">
-                    <svg class="i" aria-hidden="true"><use href="#i-bars"/></svg>
-                    <span>Generar y guardar reporte en reportes_bi</span>
-                </button>
-            </div>
-            <div id="dbOpsResultado" class="db-ops-result">
-                Selecciona una operación para ejecutar cambios o agregaciones directamente en MongoDB Atlas.
-            </div>
-        </div>
-    </details>
 
     <div class="main-columns">
         <!-- Tabla principal del mercado -->

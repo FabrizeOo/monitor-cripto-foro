@@ -80,7 +80,7 @@ function registrarEventosUI() {
         cargarMonedas();
     });
 
-    el.btnActualizarPrecios.addEventListener("click", actualizarPrecios);
+    if (el.btnActualizarPrecios) el.btnActualizarPrecios.addEventListener("click", actualizarPrecios);
     el.formComentario.addEventListener("submit", enviarComentario);
     el.btnLimpiarTarget.addEventListener("click", () => seleccionarObjetivo("MERCADO", "MERCADO GENERAL"));
     el.btnCerrarDetalle.addEventListener("click", () => el.modalDetalle.classList.add("hidden"));
@@ -510,8 +510,8 @@ function conectarTiempoReal() {
     eventSource = new EventSource(`${API_BASE_URL}/api/criptos/stream`);
 
     eventSource.addEventListener("conectado", () => {
-        el.marketStatus.className = "status-chip online";
-        el.statusLabel.textContent = "Mercado conectado";
+        if (el.marketStatus) el.marketStatus.className = "status-chip online";
+        if (el.statusLabel) el.statusLabel.textContent = "Mercado conectado";
     });
 
     eventSource.addEventListener("comentario", (event) => {
@@ -552,8 +552,8 @@ function conectarTiempoReal() {
     });
 
     eventSource.onerror = () => {
-        el.marketStatus.className = "status-chip";
-        el.statusLabel.textContent = "Reconectando...";
+        if (el.marketStatus) el.marketStatus.className = "status-chip";
+        if (el.statusLabel) el.statusLabel.textContent = "Reconectando...";
     };
 }
 
