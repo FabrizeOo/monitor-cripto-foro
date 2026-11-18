@@ -40,9 +40,30 @@ public class ComentarioCriptoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(creado);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ComentarioCripto> editarComentario(
+            @PathVariable String id,
+            @RequestBody EditarComentarioCriptoRequest request) {
+        return comentarioUseCase.editarComentario(id, request.postura(), request.contenido())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminarComentario(@PathVariable String id) {
+        return comentarioUseCase.eliminarComentario(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
+    }
+
     public record NuevoComentarioCriptoRequest(
             String monedaId,
             String autor,
+            String postura,
+            String contenido
+    ) {}
+
+    public record EditarComentarioCriptoRequest(
             String postura,
             String contenido
     ) {}

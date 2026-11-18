@@ -3,6 +3,10 @@ package com.cripto.monitor.infraestructura.adaptadores.salida.mongo;
 import com.cripto.monitor.dominio.modelo.SnapshotPrecio;
 import com.cripto.monitor.dominio.puertos.salida.SnapshotRepositorioPort;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,9 +16,11 @@ import java.util.stream.Collectors;
 public class MongoSnapshotAdapter implements SnapshotRepositorioPort {
 
     private final SpringSnapshotRepository repository;
+    private final MongoTemplate mongoTemplate;
 
-    public MongoSnapshotAdapter(SpringSnapshotRepository repository) {
+    public MongoSnapshotAdapter(SpringSnapshotRepository repository, MongoTemplate mongoTemplate) {
         this.repository = repository;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @Override
@@ -50,6 +56,29 @@ public class MongoSnapshotAdapter implements SnapshotRepositorioPort {
                         doc.getFechaCaptura()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public long purgarAntiguos(int mantenerUltimos) {
+        long total = repository.count();
+        if (total <= mantenerUltimos) {
+            return 0;
+        }
+        Query queryAntiguos = new Query()
+                .with(Sort.by(Sort.Order.desc("fechaCaptura"), Sort.Order.desc("_id")))
+                .skip(mantenerUltimos);
+        queryAntiguos.fields().include("_id");
+        List<String> idsEliminar = mongoTemplate.find(queryAntiguos, SnapshotPrecioDocumento.class)
+                .stream()
+                .map(SnapshotPrecioDocumento::getId)
+                .collect(Collectors.toList());
+        if (idsEliminar.isEmpty()) {
+            return 0;
+        }
+        return mongoTemplate.remove(
+                Query.query(Criteria.where("_id").in(idsEliminar)),
+                SnapshotPrecioDocumento.class
+        ).getDeletedCount();
     }
 
     @Override

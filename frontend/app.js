@@ -35,7 +35,11 @@ const el = {
     feedComentarios: document.getElementById("feedComentarios"),
     modalDetalle: document.getElementById("modalDetalle"),
     btnCerrarDetalle: document.getElementById("btnCerrarDetalle"),
-    detalleContenido: document.getElementById("detalleContenido")
+    detalleContenido: document.getElementById("detalleContenido"),
+    btnRecalcularEtiquetas: document.getElementById("btnRecalcularEtiquetas"),
+    btnPurgarSnapshots: document.getElementById("btnPurgarSnapshots"),
+    btnGenerarReporteBi: document.getElementById("btnGenerarReporteBi"),
+    dbOpsResultado: document.getElementById("dbOpsResultado")
 };
 
 function iniciar() {
@@ -83,6 +87,9 @@ function registrarEventosUI() {
     el.modalDetalle.addEventListener("click", (e) => {
         if (e.target === el.modalDetalle) el.modalDetalle.classList.add("hidden");
     });
+    if (el.btnRecalcularEtiquetas) el.btnRecalcularEtiquetas.addEventListener("click", ejecutarRecalculoMasivo);
+    if (el.btnPurgarSnapshots) el.btnPurgarSnapshots.addEventListener("click", ejecutarPurgaSnapshots);
+    if (el.btnGenerarReporteBi) el.btnGenerarReporteBi.addEventListener("click", ejecutarReporteBi);
 }
 
 async function cargarTodo() {
@@ -225,6 +232,9 @@ function pintarMonedas(lista) {
 
     el.tablaMonedas.innerHTML = lista.map(m => {
         const sug = evaluarSugerencia(m);
+        const alertaTag = m.precioObjetivoUsd > 0
+            ? `<span class="target-pill" title="Precio objetivo configurado">Meta: ${formatearPrecio(m.precioObjetivoUsd)}</span>`
+            : "";
         return `
         <tr data-coin-id="${escaparHtml(m.id)}" onclick="abrirAnalisis('${escaparHtml(m.id)}')">
             <td>${m.rank}</td>
@@ -233,6 +243,7 @@ function pintarMonedas(lista) {
                     ${logoMoneda(m)}
                     <strong>${escaparHtml(m.nombre)}</strong>
                     <span class="asset-sym">${escaparHtml(m.simbolo)}</span>
+                    ${alertaTag}
                 </div>
             </td>
             <td class="num"><strong>${formatearPrecio(m.precioUsd)}</strong></td>
@@ -242,10 +253,13 @@ function pintarMonedas(lista) {
             <td><span class="advice-pill ${sug.clase}">${sug.texto}</span></td>
             <td onclick="event.stopPropagation()">
                 <div class="row-btns">
-                    <button class="btn btn-ghost" onclick="darLike('${escaparHtml(m.id)}')" title="Apoyar" aria-label="Apoyar ${escaparHtml(m.nombre)}">
+                    <button type="button" class="btn btn-ghost" onclick="darLike('${escaparHtml(m.id)}')" title="Apoyar" aria-label="Apoyar ${escaparHtml(m.nombre)}">
                         ${icono("flame")} <span class="like-count">${m.likes || 0}</span>
                     </button>
-                    <button class="btn btn-ghost" onclick="seleccionarObjetivo('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')" title="Opinar" aria-label="Opinar sobre ${escaparHtml(m.nombre)}">
+                    <button type="button" class="btn btn-ghost ${m.destacada ? "is-starred" : ""}" onclick="alternarDestacada('${escaparHtml(m.id)}', ${!m.destacada})" title="Destacar en BD" aria-label="Destacar ${escaparHtml(m.nombre)}">
+                        ${icono("star")}
+                    </button>
+                    <button type="button" class="btn btn-ghost" onclick="seleccionarObjetivo('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')" title="Opinar" aria-label="Opinar sobre ${escaparHtml(m.nombre)}">
                         ${icono("message")}
                     </button>
                 </div>
@@ -305,8 +319,20 @@ window.abrirAnalisis = async function (monedaId) {
             <div id="graficoPrecio" class="chart-empty">Cargando historial...</div>
         </div>
 
+        <form class="alert-config-box" onsubmit="guardarAlertaModal(event, '${escaparHtml(m.id)}')">
+            <label for="inputPrecioObjetivo">Alerta de precio objetivo (USD) en MongoDB:</label>
+            <div class="alert-config-row">
+                <input id="inputPrecioObjetivo" type="number" step="any" min="0" placeholder="Ej. ${(m.precioUsd * 1.15).toFixed(2)}" value="${m.precioObjetivoUsd > 0 ? m.precioObjetivoUsd : ""}">
+                <label class="check-inline">
+                    <input id="checkDestacadaModal" type="checkbox" ${m.destacada ? "checked" : ""}>
+                    <span>Destacar</span>
+                </label>
+                <button type="submit" class="btn btn-ghost">Guardar (PATCH)</button>
+            </div>
+        </form>
+
         <div class="detail-actions">
-            <button class="btn btn-cyan" onclick="opinarDesdeModal('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')">
+            <button type="button" class="btn btn-cyan" onclick="opinarDesdeModal('${escaparHtml(m.id)}', '${escaparHtml(m.simbolo)}')">
                 ${icono("message")} Opinar sobre ${escaparHtml(m.simbolo)}
             </button>
         </div>
@@ -435,7 +461,7 @@ function renderComentarioHtml(c) {
     const iconoPostura = { ALCISTA: "up", BAJISTA: "down" }[c.postura] || "minus";
     const inicial = String(c.autor || "?").replace(/^@/, "").charAt(0) || "?";
     return `
-        <div class="post-card">
+        <div class="post-card" data-comment-id="${escaparHtml(c.id || "")}">
             <div class="post-head">
                 <span class="post-who">
                     <span class="post-avatar" style="background:${colorDesdeTexto(c.autor)}">${escaparHtml(inicial)}</span>
@@ -445,7 +471,14 @@ function renderComentarioHtml(c) {
             </div>
             <div class="post-symbol">$${escaparHtml(c.simbolo || "MERCADO")}</div>
             <p class="post-body">${escaparHtml(c.contenido)}</p>
-            <div class="post-time">${fecha}</div>
+            <div class="post-foot">
+                <span class="post-time">${fecha}</span>
+                ${c.id ? `
+                <div class="post-actions">
+                    <button type="button" class="icon-action" onclick="editarComentarioUI('${escaparHtml(c.id)}', '${escaparHtml(c.postura)}')" title="Editar comentario (PUT)" aria-label="Editar comentario">${icono("edit")}</button>
+                    <button type="button" class="icon-action danger" onclick="eliminarComentarioUI('${escaparHtml(c.id)}')" title="Eliminar comentario (DELETE)" aria-label="Eliminar comentario">${icono("trash")}</button>
+                </div>` : ""}
+            </div>
         </div>
     `;
 }
@@ -492,6 +525,23 @@ function conectarTiempoReal() {
 
     eventSource.addEventListener("like", (event) => {
         actualizarLikeFila(JSON.parse(event.data));
+    });
+
+    eventSource.addEventListener("alerta", () => {
+        cargarMonedas();
+    });
+
+    eventSource.addEventListener("comentario_actualizado", (event) => {
+        const editado = JSON.parse(event.data);
+        const card = el.feedComentarios.querySelector(`[data-comment-id="${CSS.escape(editado.id)}"]`);
+        if (card) card.outerHTML = renderComentarioHtml(editado);
+    });
+
+    eventSource.addEventListener("comentario_eliminado", (event) => {
+        const { id } = JSON.parse(event.data);
+        const card = el.feedComentarios.querySelector(`[data-comment-id="${CSS.escape(id)}"]`);
+        if (card) card.remove();
+        cargarResumen();
     });
 
     eventSource.addEventListener("mercado", (event) => {
@@ -554,6 +604,144 @@ function escaparHtml(texto) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
+
+window.alternarDestacada = async function (monedaId, destacada) {
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/criptos/${encodeURIComponent(monedaId)}/alerta`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ destacada })
+        });
+        if (res.ok) cargarMonedas();
+    } catch (e) {
+        console.error(e);
+    }
+};
+
+window.guardarAlertaModal = async function (e, monedaId) {
+    e.preventDefault();
+    const val = document.getElementById("inputPrecioObjetivo").value;
+    const destacada = document.getElementById("checkDestacadaModal").checked;
+    const precioObjetivoUsd = val === "" ? 0 : Number(val);
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/criptos/${encodeURIComponent(monedaId)}/alerta`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ precioObjetivoUsd, destacada })
+        });
+        if (res.ok) {
+            el.modalDetalle.classList.add("hidden");
+            cargarMonedas();
+        }
+    } catch {
+        alert("No se pudo guardar la alerta en la base de datos.");
+    }
+};
+
+window.editarComentarioUI = async function (id, posturaActual) {
+    const card = el.feedComentarios.querySelector(`[data-comment-id="${CSS.escape(id)}"]`);
+    const textoActual = card ? card.querySelector(".post-body")?.textContent || "" : "";
+    const nuevoContenido = prompt("Editar comentario (PUT en MongoDB):", textoActual);
+    if (nuevoContenido === null || !nuevoContenido.trim()) return;
+    const nuevaPostura = prompt("Postura (ALCISTA, BAJISTA o NEUTRAL):", posturaActual || "NEUTRAL") || posturaActual;
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/comentarios/${encodeURIComponent(id)}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ postura: nuevaPostura.toUpperCase(), contenido: nuevoContenido.trim() })
+        });
+        if (res.ok) cargarComentarios();
+    } catch {
+        alert("No se pudo actualizar el comentario.");
+    }
+};
+
+window.eliminarComentarioUI = async function (id) {
+    if (!confirm("¿Eliminar este comentario de MongoDB Atlas?")) return;
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/comentarios/${encodeURIComponent(id)}`, { method: "DELETE" });
+        if (res.ok) {
+            cargarComentarios();
+            cargarResumen();
+        }
+    } catch {
+        alert("No se pudo eliminar el comentario.");
+    }
+};
+
+async function ejecutarRecalculoMasivo() {
+    el.dbOpsResultado.textContent = "Ejecutando updateMany en la colección criptomonedas...";
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/criptos/recalcular-etiquetas`, { method: "POST" });
+        const data = await res.json();
+        const detalle = Object.entries(data.porEtiqueta || {})
+            .map(([k, v]) => `<span class="bi-chip"><strong>${escaparHtml(k)}:</strong> ${v}</span>`)
+            .join("");
+        el.dbOpsResultado.innerHTML = `
+            <div class="bi-summary-line">
+                <strong>updateMany completado:</strong> ${data.totalModificadas || 0} documentos clasificados en <code>criptomonedas</code>.
+            </div>
+            <div class="bi-chips-row">${detalle}</div>
+        `;
+    } catch {
+        el.dbOpsResultado.textContent = "No se pudo ejecutar la clasificación masiva.";
+    }
+}
+
+async function ejecutarPurgaSnapshots() {
+    el.dbOpsResultado.textContent = "Purgando snapshots antiguos en MongoDB...";
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/criptos/snapshots/purgar?mantenerUltimos=1500`, { method: "DELETE" });
+        const data = await res.json();
+        el.dbOpsResultado.innerHTML = `
+            <div class="bi-summary-line">
+                <strong>DELETE completado en <code>snapshots_precios</code>:</strong>
+                Eliminados <strong>${(data.eliminados ?? 0).toLocaleString("es-ES")}</strong> snapshots antiguos ·
+                Restantes: <strong>${(data.restantes ?? 0).toLocaleString("es-ES")}</strong>.
+            </div>
+        `;
+        if (data.resumen) pintarResumen(data.resumen);
+    } catch {
+        el.dbOpsResultado.textContent = "No se pudo purgar la colección de snapshots.";
+    }
+}
+
+async function ejecutarReporteBi() {
+    el.dbOpsResultado.textContent = "Generando agregación y guardando en colección reportes_bi...";
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/criptos/reporte-bi`, { method: "POST" });
+        const rep = await res.json();
+        const riesgoEntries = Object.entries(rep.distribucionRiesgo || {});
+        const totalMon = Math.max(1, Number(rep.totalMonedas || 1));
+        const barrasRiesgo = riesgoEntries.map(([k, v]) => {
+            const pct = Math.round((Number(v) / totalMon) * 100);
+            return `
+                <div class="bi-bar-row">
+                    <span class="bi-bar-label">${escaparHtml(k)} (${v})</span>
+                    <div class="bi-bar-track"><div class="bi-bar-fill" style="--bar-pct: ${pct}%"></div></div>
+                    <span class="bi-bar-pct">${pct}%</span>
+                </div>
+            `;
+        }).join("");
+
+        const foroEntries = Object.entries(rep.sentimientoForo || {});
+        const chipsForo = foroEntries.length
+            ? foroEntries.map(([k, v]) => `<span class="bi-chip"><strong>${escaparHtml(k)}:</strong> ${v}</span>`).join("")
+            : `<span class="bi-chip">Sin comentarios aún</span>`;
+
+        el.dbOpsResultado.innerHTML = `
+            <div class="bi-summary-line">
+                Guardado en colección <code>${escaparHtml(rep.coleccionGuardada || "reportes_bi")}</code>
+                (ID: <code>${escaparHtml(rep._id)}</code>) · Destacadas: <strong>${rep.monedasDestacadas ?? 0}</strong> ·
+                Alertas activas: <strong>${rep.alertasActivas ?? 0}</strong>
+            </div>
+            <div class="bi-bars-grid">${barrasRiesgo}</div>
+            <div class="bi-chips-row"><span>Sentimiento en foro:</span> ${chipsForo}</div>
+        `;
+    } catch {
+        el.dbOpsResultado.textContent = "No se pudo generar el reporte analítico.";
+    }
 }
 
 iniciar();

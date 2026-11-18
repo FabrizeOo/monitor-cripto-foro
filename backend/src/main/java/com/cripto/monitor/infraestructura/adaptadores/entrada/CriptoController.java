@@ -62,6 +62,32 @@ public class CriptoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PatchMapping("/{monedaId}/alerta")
+    public ResponseEntity<Criptomoneda> actualizarAlerta(
+            @PathVariable String monedaId,
+            @RequestBody AlertaCriptoRequest request) {
+        return criptoUseCase.actualizarAlerta(monedaId, request.precioObjetivoUsd(), request.destacada())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/recalcular-etiquetas")
+    public Map<String, Object> recalcularEtiquetasMasivo() {
+        return criptoUseCase.recalcularEtiquetasMasivo();
+    }
+
+    @DeleteMapping("/snapshots/purgar")
+    public Map<String, Object> purgarSnapshots(@RequestParam(defaultValue = "1500") int mantenerUltimos) {
+        return criptoUseCase.purgarSnapshotsAntiguos(mantenerUltimos);
+    }
+
+    @PostMapping("/reporte-bi")
+    public Map<String, Object> generarReporteBi() {
+        return criptoUseCase.generarYGuardarReporteBi();
+    }
+
+    public record AlertaCriptoRequest(Double precioObjetivoUsd, Boolean destacada) {}
+
     @GetMapping("/resumen")
     public ResumenMercado obtenerResumen() {
         return criptoUseCase.obtenerResumen();

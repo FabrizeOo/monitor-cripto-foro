@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,6 +46,24 @@ public class MongoComentarioCriptoAdapter implements ComentarioCriptoRepositorio
                 .stream()
                 .map(this::mapearADominio)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<ComentarioCripto> actualizar(String id, String postura, String contenido) {
+        return repository.findById(id).map(doc -> {
+            doc.setPostura(postura);
+            doc.setContenido(contenido);
+            return mapearADominio(repository.save(doc));
+        });
+    }
+
+    @Override
+    public boolean eliminarPorId(String id) {
+        if (id == null || !repository.existsById(id)) {
+            return false;
+        }
+        repository.deleteById(id);
+        return true;
     }
 
     @Override

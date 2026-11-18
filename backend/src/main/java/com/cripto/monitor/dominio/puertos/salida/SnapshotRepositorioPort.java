@@ -10,6 +10,10 @@ public interface SnapshotRepositorioPort {
 
     List<SnapshotPrecio> listarPorMoneda(String monedaId, int limite);
 
+    default long purgarAntiguos(int mantenerUltimos) {
+        return 0;
+    }
+
     long contarTotal();
 }
 

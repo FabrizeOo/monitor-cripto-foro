@@ -33,6 +33,10 @@
     <symbol id="i-gauge" viewBox="0 0 24 24"><path d="m12 14 4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></symbol>
     <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
     <symbol id="i-send" viewBox="0 0 24 24"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/></symbol>
 </svg>
 
 <!-- Cinta de cotizaciones deslizante -->
@@ -107,10 +111,40 @@
         </div>
     </section>
 
+    <!-- Panel de Operaciones de Base de Datos (CRUD + Agregaciones MongoDB) -->
+    <details class="db-ops-panel">
+        <summary class="db-ops-summary">
+            <span class="db-ops-title">
+                <svg class="i" aria-hidden="true"><use href="#i-db"/></svg>
+                <strong>Operaciones MongoDB &amp; Reportes Analíticos</strong>
+                <span class="db-ops-sub">Actualización masiva (updateMany), purga de snapshots (DELETE) y agregación en colección reportes_bi</span>
+            </span>
+        </summary>
+        <div class="db-ops-body">
+            <div class="db-ops-actions">
+                <button type="button" id="btnRecalcularEtiquetas" class="btn btn-ghost">
+                    <svg class="i" aria-hidden="true"><use href="#i-activity"/></svg>
+                    <span>Clasificar riesgo en lote (updateMany)</span>
+                </button>
+                <button type="button" id="btnPurgarSnapshots" class="btn btn-ghost">
+                    <svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>
+                    <span>Purgar snapshots antiguos (conservar 1,500)</span>
+                </button>
+                <button type="button" id="btnGenerarReporteBi" class="btn btn-cyan">
+                    <svg class="i" aria-hidden="true"><use href="#i-bars"/></svg>
+                    <span>Generar y guardar reporte en reportes_bi</span>
+                </button>
+            </div>
+            <div id="dbOpsResultado" class="db-ops-result">
+                Selecciona una operación para ejecutar cambios o agregaciones directamente en MongoDB Atlas.
+            </div>
+        </div>
+    </details>
+
     <div class="main-columns">
         <!-- Tabla principal del mercado -->
         <section class="market-board">
-            <div class="board-controls">
+            <search class="board-controls">
                 <label class="search-box">
                     <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
                     <input id="inputBuscar" type="search" placeholder="Buscar criptomoneda o símbolo (ej. BTC, Solana, ETH)" autocomplete="off" aria-label="Buscar criptomoneda">
@@ -119,6 +153,7 @@
                     <option value="TODAS">Todo el mercado</option>
                     <option value="ALZA">En tendencia alcista (24h)</option>
                     <option value="BAJA">En corrección (24h)</option>
+                    <option value="DESTACADAS">Destacadas / Vigiladas</option>
                 </select>
                 <select id="selectOrden" aria-label="Ordenar por">
                     <option value="RANK">Por relevancia (Ranking)</option>
@@ -126,7 +161,7 @@
                     <option value="PERDEDORAS">Mayores caídas 24h</option>
                     <option value="VOLUMEN">Mayor volumen operado</option>
                 </select>
-            </div>
+            </search>
 
             <div class="table-container">
                 <table class="crypto-table">

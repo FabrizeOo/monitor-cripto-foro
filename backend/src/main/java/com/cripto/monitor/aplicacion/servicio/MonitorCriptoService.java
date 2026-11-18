@@ -100,6 +100,47 @@ public class MonitorCriptoService implements CriptoUseCase, ComentarioCriptoUseC
     }
 
     @Override
+    public Optional<Criptomoneda> actualizarAlerta(String monedaId, Double precioObjetivoUsd, Boolean destacada) {
+        Optional<Criptomoneda> actualizada = criptoRepositorioPort.actualizarAlerta(monedaId, precioObjetivoUsd, destacada);
+        actualizada.ifPresent(moneda -> notificadorPort.publicarEvento("alerta", moneda));
+        return actualizada;
+    }
+
+    @Override
+    public Map<String, Object> recalcularEtiquetasMasivo() {
+        Map<String, Long> conteos = criptoRepositorioPort.recalcularEtiquetasMasivo();
+        long totalModificadas = conteos.values().stream().mapToLong(Long::longValue).sum();
+        Map<String, Object> respuesta = Map.of(
+                "totalModificadas", totalModificadas,
+                "porEtiqueta", conteos
+        );
+        notificadorPort.publicarEvento("etiquetas", respuesta);
+        return respuesta;
+    }
+
+    @Override
+    public Map<String, Object> purgarSnapshotsAntiguos(int mantenerUltimos) {
+        int mantenerSeguro = Math.max(100, mantenerUltimos);
+        long eliminados = snapshotRepositorioPort.purgarAntiguos(mantenerSeguro);
+        long restantes = snapshotRepositorioPort.contarTotal();
+        ResumenMercado resumen = obtenerResumen();
+        Map<String, Object> respuesta = Map.of(
+                "eliminados", eliminados,
+                "restantes", restantes,
+                "resumen", resumen
+        );
+        notificadorPort.publicarEvento("mercado", Map.of("actualizadas", 0, "resumen", resumen));
+        return respuesta;
+    }
+
+    @Override
+    public Map<String, Object> generarYGuardarReporteBi() {
+        long totalSnapshots = snapshotRepositorioPort.contarTotal();
+        long totalComentarios = comentarioRepositorioPort.contarTotal();
+        return criptoRepositorioPort.generarYGuardarReporteBi(totalSnapshots, totalComentarios);
+    }
+
+    @Override
     public ResumenMercado obtenerResumen() {
         long totalSnapshots = snapshotRepositorioPort.contarTotal();
         long totalComentarios = comentarioRepositorioPort.contarTotal();
@@ -149,6 +190,29 @@ public class MonitorCriptoService implements CriptoUseCase, ComentarioCriptoUseC
         ComentarioCripto guardado = comentarioRepositorioPort.guardar(nuevo);
         notificadorPort.publicarEvento("comentario", guardado);
         return guardado;
+    }
+
+    @Override
+    public Optional<ComentarioCripto> editarComentario(String id, String postura, String contenido) {
+        if (contenido == null || contenido.isBlank()) {
+            throw new IllegalArgumentException("El comentario no puede estar vacío");
+        }
+        String posturaLimpia = postura != null ? postura.trim().toUpperCase() : "NEUTRAL";
+        if (!POSTURAS_VALIDAS.contains(posturaLimpia)) {
+            posturaLimpia = "NEUTRAL";
+        }
+        Optional<ComentarioCripto> editado = comentarioRepositorioPort.actualizar(id, posturaLimpia, contenido.trim());
+        editado.ifPresent(c -> notificadorPort.publicarEvento("comentario_actualizado", c));
+        return editado;
+    }
+
+    @Override
+    public boolean eliminarComentario(String id) {
+        boolean eliminado = comentarioRepositorioPort.eliminarPorId(id);
+        if (eliminado) {
+            notificadorPort.publicarEvento("comentario_eliminado", Map.of("id", id));
+        }
+        return eliminado;
     }
 }
 

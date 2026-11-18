@@ -34,6 +34,9 @@ public class CriptoDocumento {
     private double porcentajeDesdeAth;
     private Instant ultimaActualizacion;
     private long likes;
+    private Double precioObjetivoUsd;
+    private boolean destacada;
+    private String etiquetaRiesgo;
 
     public CriptoDocumento() {
     }
@@ -79,5 +82,14 @@ public class CriptoDocumento {
 
     public long getLikes() { return likes; }
     public void setLikes(long likes) { this.likes = likes; }
+
+    public Double getPrecioObjetivoUsd() { return precioObjetivoUsd; }
+    public void setPrecioObjetivoUsd(Double precioObjetivoUsd) { this.precioObjetivoUsd = precioObjetivoUsd; }
+
+    public boolean isDestacada() { return destacada; }
+    public void setDestacada(boolean destacada) { this.destacada = destacada; }
+
+    public String getEtiquetaRiesgo() { return etiquetaRiesgo; }
+    public void setEtiquetaRiesgo(String etiquetaRiesgo) { this.etiquetaRiesgo = etiquetaRiesgo; }
 }
 
